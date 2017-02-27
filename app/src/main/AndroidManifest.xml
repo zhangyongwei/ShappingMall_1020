@@ -21,7 +21,8 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity android:name=".app.GoodsInfoActivity"></activity>
+        <activity android:name=".app.GoodsInfoActivity" />
+        <activity android:name=".app.WebViewActivity"></activity>
     </application>
 
 </manifest>
