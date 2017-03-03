@@ -16,6 +16,18 @@ public class GoodsBean implements Serializable {
      * 某个商品在购物车购买的数量
      */
     private int number = 1;
+    /**
+     * 是否选中
+     */
+    private boolean isChecked = true;
+
+    public boolean isChecked() {
+        return isChecked;
+    }
+
+    public void setChecked(boolean checked) {
+        isChecked = checked;
+    }
 
     public int getNumber() {
         return number;

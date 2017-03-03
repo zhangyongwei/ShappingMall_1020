@@ -138,5 +138,6 @@ public class MainActivity extends AppCompatActivity {
         fragments.add(new ShoppingCartFragment());//购物车
         fragments.add(new UserFragment());//用户
 
+
     }
 }

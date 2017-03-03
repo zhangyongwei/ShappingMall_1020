@@ -27,7 +27,7 @@ public class CartStorage {
      */
     private SparseArray<GoodsBean> sparseArray;
 
-    public CartStorage(Context mContext) {
+    private CartStorage(Context mContext) {
         this.mContext = mContext;
         sparseArray = new SparseArray<>();
         //从本地获取数据
@@ -104,7 +104,7 @@ public class CartStorage {
         //已经保存
         if(tempGoodsBean!=null) {
 
-            tempGoodsBean.setNumber(tempGoodsBean.getNumber()+goodsBean.getNumber());
+            tempGoodsBean.setNumber(goodsBean.getNumber());
 
         }else{
 
@@ -173,4 +173,16 @@ public class CartStorage {
 
         return goodsBeanList;
     }
+
+    /**
+     * 是否在购物车中存在
+     * @param product_id
+     * @return
+     */
+    public GoodsBean findDete(String product_id){
+
+        return sparseArray.get(Integer.parseInt(product_id));
+
+    }
+
 }
