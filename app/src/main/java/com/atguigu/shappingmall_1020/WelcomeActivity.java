@@ -23,6 +23,8 @@ public class WelcomeActivity extends AppCompatActivity {
                 startMainActivity();
             }
         }, 2000);
+
+
     }
 
     /**
