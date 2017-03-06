@@ -1,5 +1,6 @@
 package com.atguigu.shappingmall_1020;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -138,6 +139,14 @@ public class MainActivity extends AppCompatActivity {
         fragments.add(new ShoppingCartFragment());//购物车
         fragments.add(new UserFragment());//用户
 
+
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        int id = intent.getIntExtra("checkedid", R.id.rb_home);
+        rgMain.check(id);
 
     }
 }

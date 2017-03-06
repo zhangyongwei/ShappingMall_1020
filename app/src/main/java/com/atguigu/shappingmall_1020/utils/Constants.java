@@ -6,6 +6,10 @@ package com.atguigu.shappingmall_1020.utils;
 
 public class Constants {
 
+
+
+//    public static String BASE_URL = "http://192.168.0.6:8080/atguigu";
+
     public static String BASE_URL = "http://192.168.1.26:8080/atguigu";
 //    public static String BASE_URL = "http://192.168.191.1:8080/atguigu";
 //    public static String BASE_URL = "http://10.0.2.2:8080/atguigu";

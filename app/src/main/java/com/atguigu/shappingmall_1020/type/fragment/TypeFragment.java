@@ -87,6 +87,7 @@ public class TypeFragment extends BaseFragment {
             if (tempFragment != null) {
 
                 ft.hide(tempFragment);
+
             }
             //事务提交
             ft.commit();

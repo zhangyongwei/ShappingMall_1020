@@ -25,6 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.atguigu.shappingmall_1020.MainActivity;
 import com.atguigu.shappingmall_1020.R;
 import com.atguigu.shappingmall_1020.home.adapter.HomeAdapter;
 import com.atguigu.shappingmall_1020.home.bean.GoodsBean;
@@ -103,8 +104,7 @@ public class GoodsInfoActivity extends AppCompatActivity {
 
     private void setData() {
         //1.设置图片
-        Glide.with(this).load(Constants.BASE_URL_IMAGE+goodsBean.getFigure()).into(ivGoodInfoImage);
-
+        Glide.with(this).load(Constants.BASE_URL_IMAGE+goodsBean.getFigure()).placeholder(R.drawable.new_user_icon_background).into(ivGoodInfoImage);
         //2.设置名称和价格
         tvGoodInfoName.setText(goodsBean.getName());
 
@@ -184,11 +184,12 @@ public class GoodsInfoActivity extends AppCompatActivity {
                 Toast.makeText(this, "收藏", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.tv_good_info_cart:
-                Toast.makeText(this, "跳转到购物车", Toast.LENGTH_SHORT).show();
+                intent = new Intent(this, MainActivity.class);
+                intent.putExtra("checkedid",R.id.rb_cart);
+                startActivity(intent);
+                finish();
                 break;
             case R.id.btn_good_info_addcart:
-
-//                CartStorage.getInstance(this).addData(goodsBean);
 
                 showPopwindow();
 
@@ -200,7 +201,7 @@ public class GoodsInfoActivity extends AppCompatActivity {
                 Toast.makeText(this, "搜索", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.tv_more_home:
-                Toast.makeText(this, "首页", Toast.LENGTH_SHORT).show();
+                finish();
                 break;
             case R.id.btn_more:
 

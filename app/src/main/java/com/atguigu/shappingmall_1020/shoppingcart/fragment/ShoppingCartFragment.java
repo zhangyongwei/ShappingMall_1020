@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alipay.sdk.app.PayTask;
+import com.atguigu.shappingmall_1020.MainActivity;
 import com.atguigu.shappingmall_1020.R;
 import com.atguigu.shappingmall_1020.base.BaseFragment;
 import com.atguigu.shappingmall_1020.home.bean.GoodsBean;
@@ -273,7 +275,10 @@ public class ShoppingCartFragment extends BaseFragment {
                 Toast.makeText(mContext, "收藏", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.tv_empty_cart_tobuy:
-                Toast.makeText(mContext, "去逛逛", Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(mContext, MainActivity.class);
+                intent.putExtra("checkedid",R.id.rb_home);
+                startActivity(intent);
                 break;
         }
     }
