@@ -1,5 +1,7 @@
 package com.atguigu.shappingmall_1020.home.fragment;
 
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -10,10 +12,15 @@ import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.atguigu.shappingmall_1020.R;
+import com.atguigu.shappingmall_1020.app.GoodsInfoActivity;
 import com.atguigu.shappingmall_1020.base.BaseFragment;
+import com.atguigu.shappingmall_1020.home.activity.SearchActivity;
 import com.atguigu.shappingmall_1020.home.adapter.HomeAdapter;
+import com.atguigu.shappingmall_1020.home.bean.GoodsBean;
 import com.atguigu.shappingmall_1020.home.bean.HomeBean;
 import com.atguigu.shappingmall_1020.utils.Constants;
+import com.uuzuche.lib_zxing.activity.CaptureActivity;
+import com.uuzuche.lib_zxing.activity.CodeUtils;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
@@ -37,6 +44,8 @@ public class HomeFragment extends BaseFragment {
     @InjectView(R.id.ib_top)
     ImageButton ibTop;
     private HomeAdapter adapter;
+    private static final int REQUEST_CODE = 111;
+    private Intent intent;
 
     @Override
     public View initView() {
@@ -127,11 +136,13 @@ public class HomeFragment extends BaseFragment {
         ButterKnife.reset(this);
     }
 
-    @OnClick({R.id.tv_search_home, R.id.tv_message_home, R.id.ib_top})
+    @OnClick({R.id.tv_search_home, R.id.tv_message_home, R.id.ib_top,R.id.ll_main_scan})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_search_home:
-                Toast.makeText(mContext, "搜索", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(mContext, SearchActivity.class);
+                startActivity(intent);
+
                 break;
             case R.id.tv_message_home:
                 Toast.makeText(mContext, "查看信息", Toast.LENGTH_SHORT).show();
@@ -141,6 +152,54 @@ public class HomeFragment extends BaseFragment {
                rvHome.scrollToPosition(0);
 
                 break;
+
+            case R.id.ll_main_scan:
+                /**
+                 * 扫一扫
+                 */
+                intent = new Intent(mContext, CaptureActivity.class);
+                startActivityForResult(intent, REQUEST_CODE);
+
+                break;
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        /**
+         * 处理二维码扫描结果
+         */
+        if (requestCode == REQUEST_CODE) {
+            //处理扫描结果（在界面上显示）
+            if (null != data) {
+                Bundle bundle = data.getExtras();
+                if (bundle == null) {
+                    return;
+                }
+                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
+                    String result = bundle.getString(CodeUtils.RESULT_STRING);
+                    Toast.makeText(mContext, "解析结果:" + result, Toast.LENGTH_LONG).show();
+
+                    GoodsBean goodsBean = new GoodsBean();
+
+                    String[] s = result.split(",");
+
+                    goodsBean.setFigure(s[0]);
+                    goodsBean.setName(s[1]);
+                    goodsBean.setProduct_id(s[2]);
+                    goodsBean.setCover_price(null);
+
+
+                    Intent intent = new Intent(mContext, GoodsInfoActivity.class);
+                    intent.putExtra(HomeAdapter.GOODS_BEAN,goodsBean);
+                    startActivity(intent);
+
+
+                } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
+                    Toast.makeText(mContext, "解析二维码失败", Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 }

@@ -195,7 +195,10 @@ public class GoodsInfoActivity extends AppCompatActivity {
 
                 break;
             case R.id.tv_more_share:
-                Toast.makeText(this, "分享", Toast.LENGTH_SHORT).show();
+                //点击分享生成二维码
+                intent = new Intent(this,QRcodeActivity.class);
+                intent.putExtra(HomeAdapter.GOODS_BEAN,goodsBean);
+                startActivity(intent);
                 break;
             case R.id.tv_more_search:
                 Toast.makeText(this, "搜索", Toast.LENGTH_SHORT).show();

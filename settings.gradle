@@ -1,2 +1,2 @@
-include ':app', ':AddSubView', ':gradationscroll'
+include ':app', ':AddSubView', ':gradationscroll', ':android-zxingLibrary-master', ':flowlayout-lib', ':flowlayout'
 

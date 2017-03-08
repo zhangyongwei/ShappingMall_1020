@@ -9,7 +9,10 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/AddSubView" />
+            <option value="$PROJECT_DIR$/android-zxingLibrary-master" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/flowlayout" />
+            <option value="$PROJECT_DIR$/flowlayout-lib" />
             <option value="$PROJECT_DIR$/gradationscroll" />
           </set>
         </option>

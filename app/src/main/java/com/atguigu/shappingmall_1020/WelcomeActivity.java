@@ -15,8 +15,6 @@ public class WelcomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
 
-
-
         //发送延迟消息
         handler.postDelayed(new Runnable() {
             @Override
@@ -25,7 +23,6 @@ public class WelcomeActivity extends AppCompatActivity {
                 startMainActivity();
             }
         }, 2000);
-
 
     }
 
