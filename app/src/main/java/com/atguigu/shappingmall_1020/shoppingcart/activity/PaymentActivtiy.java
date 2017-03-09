@@ -1,30 +1,29 @@
-package com.atguigu.shappingmall_1020.shoppingcart.fragment;
+package com.atguigu.shappingmall_1020.shoppingcart.activity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alipay.sdk.app.PayTask;
-import com.atguigu.shappingmall_1020.MainActivity;
 import com.atguigu.shappingmall_1020.R;
-import com.atguigu.shappingmall_1020.base.BaseFragment;
 import com.atguigu.shappingmall_1020.home.bean.GoodsBean;
-import com.atguigu.shappingmall_1020.shoppingcart.activity.PaymentActivtiy;
-import com.atguigu.shappingmall_1020.shoppingcart.adapter.ShoppingCartAdapter;
+import com.atguigu.shappingmall_1020.home.view.MyListView;
+import com.atguigu.shappingmall_1020.shoppingcart.adapter.PaymentAdapter;
+import com.atguigu.shappingmall_1020.shoppingcart.bean.AddressBean;
 import com.atguigu.shappingmall_1020.shoppingcart.utils.CartStorage;
 import com.atguigu.shappingmall_1020.shoppingcart.utils.PayResult;
 import com.atguigu.shappingmall_1020.shoppingcart.utils.SignUtils;
@@ -32,6 +31,7 @@ import com.atguigu.shappingmall_1020.shoppingcart.utils.SignUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -41,259 +41,163 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
-/**
- * Created by 张永卫on 2017/2/22.
- */
+public class PaymentActivtiy extends AppCompatActivity {
 
-public class ShoppingCartFragment extends BaseFragment {
+    @InjectView(R.id.tv_left_back)
+    TextView tvLeftBack;
+    @InjectView(R.id.title_right)
+    ImageView titleRight;
+    @InjectView(R.id.tvAddresseeName)
+    TextView tvAddresseeName;
+    @InjectView(R.id.tvSmeAredAddress)
+    TextView tvSmeAredAddress;
+    @InjectView(R.id.tvAddressNext)
+    TextView tvAddressNext;
+    @InjectView(R.id.detailAddress)
+    TextView detailAddress;
+    @InjectView(R.id.addressRelative)
+    RelativeLayout addressRelative;
+    @InjectView(R.id.tv_paymode)
+    TextView tvPaymode;
+    @InjectView(R.id.alipay)
+    RadioButton alipay;
+    @InjectView(R.id.weixing)
+    RadioButton weixing;
+    @InjectView(R.id.rg_paymode)
+    RadioGroup rgPaymode;
+    @InjectView(R.id.myListView)
+    MyListView myListView;
+    @InjectView(R.id.tvCheckOutAllPrice)
+    TextView tvCheckOutAllPrice;
+    @InjectView(R.id.btnSureCheckOut)
+    Button btnSureCheckOut;
 
+    private ArrayList<AddressBean> addressList;
+    private List<GoodsBean> listData;
 
-    @InjectView(R.id.tv_shopcart_edit)
-    TextView tvShopcartEdit;
-    @InjectView(R.id.recyclerview)
-    RecyclerView recyclerview;
-    @InjectView(R.id.checkbox_all)
-    CheckBox checkboxAll;
-    @InjectView(R.id.tv_shopcart_total)
-    TextView tvShopcartTotal;
-    @InjectView(R.id.btn_check_out)
-    Button btnCheckOut;
-    @InjectView(R.id.ll_check_all)
-    LinearLayout llCheckAll;
-    @InjectView(R.id.checkbox_delete_all)
-    CheckBox checkboxDeleteAll;
-    @InjectView(R.id.btn_delete)
-    Button btnDelete;
-    @InjectView(R.id.btn_collection)
-    Button btnCollection;
-    @InjectView(R.id.ll_delete)
-    LinearLayout llDelete;
-    @InjectView(R.id.iv_empty)
-    ImageView ivEmpty;
-    @InjectView(R.id.tv_empty_cart_tobuy)
-    TextView tvEmptyCartTobuy;
-    @InjectView(R.id.ll_empty_shopcart)
-    LinearLayout llEmptyShopcart;
-    private ShoppingCartAdapter adapter;
-    private List<GoodsBean> list;
-    /**
-     * 编辑状态
-     */
-    private static final int ACTION_EDIT = 1;
-
-    /**
-     * 完成状态
-     */
-    private static final int ACTION_COMPLETE = 2;
-    private boolean isChecked;
-    private Intent intent;
+    private PaymentAdapter adapter;
 
 
     @Override
-    public View initView() {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_payment_activtiy);
+        ButterKnife.inject(this);
 
-        View view = View.inflate(mContext, R.layout.fragment_shopping_cart, null);
-        ButterKnife.inject(this, view);
+        getAddressData();
+        showAddressInfo(0);
+        setData();
+        showTotalPrice();
 
-        //设置编辑状态
-        tvShopcartEdit.setTag(ACTION_EDIT);
-        tvShopcartEdit.setText("编辑");
-        //显示去结算布局
-        llCheckAll.setVisibility(View.VISIBLE);
+    }
 
-        tvShopcartEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //1.得到状态
-                int action = (int) v.getTag();
 
-                //2.根据不同状态做不同的处理
-                if(action==ACTION_EDIT) {
 
-                    //切换完成状态
-                    showDelete();
-                }else{
+    private void setData() {
 
-                    //切换成编辑状态
-                    hideDelete();
+        rgPaymode.check(R.id.alipay);
+        listData = CartStorage.getInstance(this).getAllData();
+
+        if (listData != null && listData.size() > 0) {
+            adapter = new PaymentAdapter(this, listData);
+            myListView.setAdapter(adapter);
+        }
+    }
+
+    public void showTotalPrice() {
+        tvCheckOutAllPrice.setText("合计:" + getTotalPrice());
+    }
+
+    /**
+     * 得到总价格
+     *
+     * @return
+     */
+    public double getTotalPrice() {
+        double totalPrice = 0.0;
+
+        if (listData != null && listData.size() > 0) {
+            for (int i = 0; i < listData.size(); i++) {
+
+                GoodsBean goodsBean = listData.get(i);
+                if (goodsBean.isChecked()) {
+                    //被选中的
+                    totalPrice = totalPrice + goodsBean.getNumber() * Double.parseDouble(goodsBean.getCover_price());
                 }
             }
-        });
-
-        return view;
-    }
-
-    private void hideDelete() {
-        //1.设置编辑
-        tvShopcartEdit.setTag(ACTION_EDIT);
-        //2.显示删除控件
-        llDelete.setVisibility(View.GONE);
-        //3.隐藏结算控件
-        llCheckAll.setVisibility(View.VISIBLE);
-        //4.设置文本为完成
-        tvShopcartEdit.setText("编辑");
-        //5.把所有的数据设置勾选状态
-        if(adapter!=null) {
-
-            adapter.checkAll_none(true);
-            adapter.checkAll();
-            adapter.showTotalPrice();
-        }
-    }
-
-    private void showDelete() {
-        //1.设置完成
-        tvShopcartEdit.setTag(ACTION_COMPLETE);
-        //2.显示删除控件
-        llDelete.setVisibility(View.VISIBLE);
-        //3.隐藏结算控件
-        llCheckAll.setVisibility(View.GONE);
-        //4.设置文本为完成
-        tvShopcartEdit.setText("完成");
-        //5.把所有的数据设置非选择状态
-        if(adapter!=null) {
-
-            adapter.checkAll_none(false);
-            adapter.checkAll();
-            adapter.showTotalPrice();
-        }
-    }
-
-    @Override
-    public void initData() {
-        super.initData();
-
-        showData();
-
-    }
-
-    private void showData() {
-        list = CartStorage.getInstance(mContext).getAllData();
-        if(list !=null && list.size()>0) {
-
-            //购物车有数据
-            llEmptyShopcart.setVisibility(View.GONE);
-
-            adapter = new ShoppingCartAdapter(mContext, list,tvShopcartTotal,checkboxAll,checkboxDeleteAll);
-            //设置RecyclerView的适配器
-            recyclerview.setAdapter(adapter);
-
-            //布局管理器
-            recyclerview.setLayoutManager(new LinearLayoutManager(mContext,LinearLayoutManager.VERTICAL,false));
-
-            //设置点击事件
-            adapter.setOnItemClickListener(new ShoppingCartAdapter.OnItemClickListener() {
-                @Override
-                public void onItemClickListener(View view, int position) {
-                    //1.设置Bean对象状态取反
-                    GoodsBean goodsBean = list.get(position);
-                    goodsBean.setChecked(!goodsBean.isChecked());
-
-                    adapter.notifyItemChanged(position);
-
-                    //2.刷新价格
-                    adapter.showTotalPrice();
-
-                    //3.校验是否全选
-                    adapter.checkAll();
-
-                }
-            });
-
-            //校验是否全选
-            adapter.checkAll();
-
-        }else{
-
-            //购物车没有数据
-            llEmptyShopcart.setVisibility(View.VISIBLE);
         }
 
-
-
-
+        return totalPrice;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    private void getAddressData() {
+        addressList = new ArrayList<AddressBean>();
+
+        AddressBean bean = new AddressBean();
+        bean.setName("杨先生");
+        bean.setSmearedAddress("贵州省黎平县");
+        bean.setDetailAddress("黎平一中  15527196048");
+        addressList.add(bean);
+
+        AddressBean bean2 = new AddressBean();
+        bean2.setName("杨先生");
+        bean2.setSmearedAddress("北京昌平");
+        bean2.setDetailAddress("北京昌平xxx家园  18140549110");
+        addressList.add(bean2);
     }
 
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
+    //显示收货人姓名地址等信息
+    private void showAddressInfo(int index) {
 
-        if(!hidden) {
-
-            showData();
-        }
+        AddressBean bean = addressList.get(index);
+        tvAddresseeName.setText(bean.getName());
+        tvSmeAredAddress.setText(bean.getSmearedAddress());
+        detailAddress.setText(bean.getDetailAddress());
     }
 
-
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.reset(this);
-    }
-
-    @OnClick({R.id.tv_shopcart_edit, R.id.checkbox_all, R.id.btn_check_out, R.id.checkbox_delete_all, R.id.btn_delete, R.id.btn_collection, R.id.tv_empty_cart_tobuy})
+    @OnClick({R.id.tv_left_back, R.id.tvAddressNext, R.id.btnSureCheckOut})
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.tv_shopcart_edit:
-                Toast.makeText(mContext, "编辑", Toast.LENGTH_SHORT).show();
+            case R.id.tv_left_back:
+                finish();
                 break;
-            case R.id.checkbox_all:
-//                Toast.makeText(mContext, "全选", Toast.LENGTH_SHORT).show();
-                boolean isChecked = checkboxAll.isChecked();
-                //全选和反全选
-                adapter.checkAll_none(isChecked);
-                //显示总价格
-                adapter.showTotalPrice();
-                break;
-            case R.id.btn_check_out:
-//                Toast.makeText(mContext, "去结算", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(mContext, PaymentActivtiy.class);
-                startActivity(intent);
 
-//                pay();
+            case R.id.tvAddressNext:
+                // 修改收货地址
+                updateAddress();
                 break;
-            case R.id.checkbox_delete_all:
-//                Toast.makeText(mContext, "删除全选", Toast.LENGTH_SHORT).show();
-                isChecked = checkboxDeleteAll.isChecked();
-                //全选和反全选
-                adapter.checkAll_none(isChecked);
-                //显示总价格
-                adapter.showTotalPrice();
 
-                break;
-            case R.id.btn_delete:
-//                Toast.makeText(mContext, "删除按钮", Toast.LENGTH_SHORT).show();
-
-                adapter.deleteData();
-                adapter.checkAll();
-                showEempty();
-
-                break;
-            case R.id.btn_collection:
-                Toast.makeText(mContext, "收藏", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.tv_empty_cart_tobuy:
-
-                intent = new Intent(mContext, MainActivity.class);
-                intent.putExtra("checkedid",R.id.rb_home);
-                startActivity(intent);
+            case R.id.btnSureCheckOut:
+                int checkId = rgPaymode.getCheckedRadioButtonId();
+                if (checkId == R.id.alipay) {
+                    //支付
+                    pay();
+                } else if (checkId == R.id.weixing) {
+                    //微信支付
+                    Toast.makeText(this, "微信暂未完成", Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
     }
 
-    /**
-     * 没有数据的时候显示
-     */
-    private void showEempty() {
-        if(adapter.getItemCount()==0) {
+    private static int REQUESTCODE = 1;          //跳转请求码
 
-            llEmptyShopcart.setVisibility(View.VISIBLE);
+    //修改地址
+    private void updateAddress() {
+        Intent intent = new Intent(PaymentActivtiy.this, UpdateAddressActivity.class);
+        intent.putExtra("AddressLiist", addressList);
+        startActivityForResult(intent, REQUESTCODE);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUESTCODE && resultCode == RESULT_OK) {
+            Bundle bundle = data.getExtras();
+            int addressIndex = bundle.getInt("addressIndex");
+            showAddressInfo(addressIndex);
         }
     }
 
@@ -344,16 +248,16 @@ public class ShoppingCartFragment extends BaseFragment {
                     String resultStatus = payResult.getResultStatus();
                     // 判断resultStatus 为“9000”则代表支付成功，具体状态码代表含义可参考接口文档
                     if (TextUtils.equals(resultStatus, "9000")) {
-                        Toast.makeText(mContext, "支付成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PaymentActivtiy.this, "支付成功", Toast.LENGTH_SHORT).show();
                     } else {
                         // 判断resultStatus 为非"9000"则代表可能支付失败
                         // "8000"代表支付结果因为支付渠道原因或者系统原因还在等待支付结果确认，最终交易是否成功以服务端异步通知为准（小概率状态）
                         if (TextUtils.equals(resultStatus, "8000")) {
-                            Toast.makeText(mContext, "支付结果确认中", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(PaymentActivtiy.this, "支付结果确认中", Toast.LENGTH_SHORT).show();
 
                         } else {
                             // 其他值就可以判断为支付失败，包括用户主动取消支付，或者系统返回的错误
-                            Toast.makeText(mContext, "支付失败", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(PaymentActivtiy.this, "支付失败", Toast.LENGTH_SHORT).show();
 
                         }
                     }
@@ -371,7 +275,7 @@ public class ShoppingCartFragment extends BaseFragment {
      */
     public void pay() {
         if (TextUtils.isEmpty(PARTNER) || TextUtils.isEmpty(RSA_PRIVATE) || TextUtils.isEmpty(SELLER)) {
-            new AlertDialog.Builder(mContext).setTitle("警告").setMessage("需要配置PARTNER | RSA_PRIVATE| SELLER")
+            new AlertDialog.Builder(PaymentActivtiy.this).setTitle("警告").setMessage("需要配置PARTNER | RSA_PRIVATE| SELLER")
                     .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialoginterface, int i) {
                             //
@@ -381,7 +285,7 @@ public class ShoppingCartFragment extends BaseFragment {
             return;
         }
         //生成订单信息-在客户端或者服务器
-        String orderInfo = getOrderInfo("硅谷内裤", "好棒好棒的内裤", adapter.getTotalPrice()+"");
+        String orderInfo = getOrderInfo("硅谷内裤", "好棒好棒的内裤", getTotalPrice()+"");
 
         /**
          * 特别注意，这里的签名逻辑需要放在服务端，切勿将私钥泄露在代码中！
@@ -406,7 +310,7 @@ public class ShoppingCartFragment extends BaseFragment {
             @Override
             public void run() {
                 // 构造PayTask 对象
-                PayTask alipay = new PayTask((Activity) mContext);
+                PayTask alipay = new PayTask(PaymentActivtiy.this);
                 // 调用支付接口，获取支付结果
                 String result = alipay.pay(payInfo, true);
 
